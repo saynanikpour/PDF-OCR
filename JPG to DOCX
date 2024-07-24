@@ -1,0 +1,39 @@
+import pytesseract
+import cv2
+from PIL import Image
+from docx import Document
+import numpy as np
+
+# تنظیمات pytesseract برای شناسایی فارسی
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+custom_config = r'--oem 3 --psm 6'
+
+# تابع برای خواندن متن از تصویر
+def extract_text_from_image(image_path):
+    try:
+        pil_image = Image.open(image_path)
+        img = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+        text = pytesseract.image_to_string(img, config=custom_config, lang='fas')
+        return text.strip()
+    except Exception as e:
+        raise ValueError(f"Could not open or process the image: {image_path}. Error: {e}")
+
+# تابع برای ایجاد فایل Word و نوشتن متن در آن
+def create_word_file(text, output_path):
+    doc = Document()
+    doc.add_heading('Extracted Text', 0)
+    doc.add_paragraph(text)
+    doc.save(output_path)
+
+# مسیر تصویر و خروجی فایل Word
+image_path = 'D:/Lavan/Python/page1.jpg'
+output_path = 'output.docx'
+
+# استخراج متن از تصویر
+try:
+    extracted_text = extract_text_from_image(image_path)
+    # ایجاد فایل Word و نوشتن متن در آن
+    create_word_file(extracted_text, output_path)
+    print(f'متن با موفقیت استخراج شد و به فایل {output_path} ذخیره شد.')
+except Exception as e:
+    print(f'خطا: {e}')
